@@ -12,7 +12,29 @@ Those special scales contain ESP8266 and send their state to a central server. T
 ![a diagram showing the oveall architecture of the monitoring system](doc/architecture_diagram.png)
 
 ## Hardware
-The Hardware is based on a board with 4 load cells attahed to it. The signals of the loadcells are amplified and digitalized by a HX711 load cell amplifier which is connected to an ESP8266 Board.
+The Hardware is based on a board with 4 load cells attached to it according to the schematic of this [Load Sensor Combinator](https://www.sparkfun.com/products/13878):
+
+| JP1_UL  |     | Upper Left |
+| ------- | --- | ---------- |
+| C       | RED | E-         |
+| +       | WHT | JP2_UR_WHT |
+| -       | BLK | JP3_LL_BLK |
+
+| JP2_UR  |     | Upper Right |
+| ------- | --- | ----------- |
+| C       | RED | A-          |
+| -       | BLK | JP4_LR_BLK  |
+
+| JP3_LL  |     | Lower Left |
+| ------- | --- | ---------- |
+| C       | RED | A+         |
+| +       | WHT | JP4_LR_WHT |
+
+| JP4_LR  |     | Lower Right |
+| ------- | --- | ----------- |
+| C       | RED | E+          |
+
+The signals of the load cells are amplified and digitalized by an HX711 load cell amplifier which is connected to an ESP8266 Board.
 
 Currently the HX711 is hooked up to pins 12 & 14 (clock & data) of the ESP.
 
