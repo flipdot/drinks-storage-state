@@ -1,9 +1,11 @@
-// hardware settings
+// Hardware settings
 constexpr byte CLOCK_PIN = 14;
 constexpr byte DATA_PIN = 12;
-constexpr int DIFFERENCE_THRESHHOLD = 42;
 
-// network settings
-constexpr char * SSID = "kassel.freifunk.net";
-constexpr char * PASSWORD = "";
-constexpr char * HTTP_URL = "http://drinks.fd/collect";
+// Sample count for median computation
+constexpr byte M_SAMPLES = 50;
+
+// Network settings
+constexpr const char* SSID = "kassel.freifunk.net";
+constexpr const char* PASSWORD = "";
+constexpr const char* HTTP_URL = "http://rail.fd/collect";
