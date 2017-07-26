@@ -1,4 +1,4 @@
-# Drinks Strorage State
+# Drinks Storage State
 ![build badge](https://api.travis-ci.org/flipdot/drinks-storage-state.svg)
 
 This repo contains the design files (not yet) and firmware for the hardware, which measures the state of our beverage storage site.
@@ -9,7 +9,7 @@ Our beverage storage site consists of multiple stacks of crates, where each stac
 Each of the stacks is standing on a special scale, which monitors how many crates are on the stack.
 Those special scales contain ESP8266 and send their state to a central server. The data is processed at server site and forwarded to a graphana server for visualisation.
 
-![a diagram showing the oveall architecture of the monitoring system](doc/architecture_diagram.png)
+![a diagram showing the overall architecture of the monitoring system](doc/architecture_diagram.png)
 
 ## Hardware
 The Hardware is based on a board with 4 load cells attached to it according to the schematic of this [Load Sensor Combinator](https://www.sparkfun.com/products/13878):
@@ -39,5 +39,4 @@ The signals of the load cells are amplified and digitalized by an HX711 load cel
 Currently the HX711 is hooked up to pins 12 & 14 (clock & data) of the ESP.
 
 ## Software
-The software is written with the arduino framework and build using [platformio](http://platformio.org/).
-To build the firmware and upload it to the ESP simply install platfomio and run `platformio run -t upload`
+The software is written with the Arduino framework and build using [platformio](http://platformio.org/). To build the firmware and upload it to the ESP simply install platfomio and run `platformio run -t upload`.
