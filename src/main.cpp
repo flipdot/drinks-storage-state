@@ -1,35 +1,41 @@
-#include "main.hpp"
+#include <algorithm>
+#include <vector>
+
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+#include <HX711.h>
+
 #include "config.hpp"
 
 using namespace std;
 
-HX711 * scale;
+const uint32_t CHIP_ID = ESP.getChipId();
+
+HX711* scale;
 vector<long> last_measurements;
-uint32_t chip_id = ESP.getChipId();
 
 long compute_median(vector<long> values) {
-    nth_element(
-        values.begin(),
-        values.begin() + (M_SAMPLES / 2),
-        values.end()
-    );
+    nth_element(values.begin(), values.begin() + (M_SAMPLES / 2), values.end());
     return values[M_SAMPLES / 2];
 }
 
 long send_value(long value) {
     // Format JSON
-    DynamicJsonBuffer jsonBuffer;
-    JsonObject& root = jsonBuffer.createObject();
-    root["espId"] = chip_id;
-    root["scaleValue"] = value;
-    String jsonString;
-    root.printTo(jsonString);
+    DynamicJsonBuffer json_buffer;
+    JsonObject& root = json_buffer.createObject();
+    root["esp_id"] = CHIP_ID;
+    root["scale_value"] = value;
+    String json_string;
+    root.printTo(json_string);
 
     // Send HTTP request
-    Serial.printf("\nSending HTTP request with payload: %s\n", jsonString.c_str());
+    Serial.printf(
+            "\nSending HTTP request with payload: %s\n", json_string.c_str());
     HTTPClient http;
     http.begin(HTTP_URL);
-    int return_code = http.POST(jsonString);
+    int return_code = http.POST(json_string);
     Serial.printf("Finished HTTP request with return code %d.\n", return_code);
 }
 
@@ -55,11 +61,9 @@ void setup() {
         Serial.print(".");
     }
 
-    Serial.printf(
-        "\nConnected to: %s with IP address %s\n",
-        SSID,
-        WiFi.localIP().toString().c_str()
-    );
+    Serial.printf("\nConnected to: %s with IP address %s\n",
+            SSID,
+            WiFi.localIP().toString().c_str());
 
     Serial.println("Setup complete!\n");
 }

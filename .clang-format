@@ -12,3 +12,4 @@ ContinuationIndentWidth: 8
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortLoopsOnASingleLine: true
 ReflowComments: false
+PointerAlignment: Left
