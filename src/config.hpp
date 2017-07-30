@@ -8,4 +8,4 @@ constexpr byte M_SAMPLES = 50;
 // Network settings
 constexpr const char* SSID = "kassel.freifunk.net";
 constexpr const char* PASSWORD = "";
-constexpr const char* HTTP_URL = "http://rail.fd/collect";
+constexpr const char* MQTT_HOST = "rail.fd";

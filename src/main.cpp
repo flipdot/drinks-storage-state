@@ -1,17 +1,22 @@
 #include <algorithm>
 #include <vector>
 
+#include <cstring>
+
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <ESP8266HTTPClient.h>
 #include <ESP8266WiFi.h>
 #include <HX711.h>
+#include <PubSubClient.h>
 
 #include "config.hpp"
 
 using namespace std;
 
 const uint32_t CHIP_ID = ESP.getChipId();
+
+WiFiClient wifi_client;
+PubSubClient mqtt_client(MQTT_HOST, 1883, wifi_client);
 
 HX711* scale;
 vector<long> last_measurements;
@@ -30,13 +35,11 @@ long send_value(long value) {
     String json_string;
     root.printTo(json_string);
 
-    // Send HTTP request
-    Serial.printf(
-            "\nSending HTTP request with payload: %s\n", json_string.c_str());
-    HTTPClient http;
-    http.begin(HTTP_URL);
-    int return_code = http.POST(json_string);
-    Serial.printf("Finished HTTP request with return code %d.\n", return_code);
+    // Send MQTT message
+    Serial.printf("\nPublishing to MQTT broker: %s...", json_string.c_str());
+    mqtt_client.publish(
+            "drinks_storage/scale_measurements", json_string.c_str());
+    Serial.printf(" success.\n");
 }
 
 void setup() {
@@ -53,7 +56,7 @@ void setup() {
     scale = new HX711(DATA_PIN, CLOCK_PIN);
 
     // Initialize WiFi connection
-    Serial.print("Connecting to WiFi.");
+    Serial.println("Connecting to WiFi.");
     WiFi.begin(SSID, PASSWORD);
 
     while (WiFi.status() != WL_CONNECTED) {
@@ -61,10 +64,16 @@ void setup() {
         Serial.print(".");
     }
 
-    Serial.printf("\nConnected to: %s with IP address %s\n",
+    Serial.printf("Connected to: %s with IP address %s\n",
             SSID,
             WiFi.localIP().toString().c_str());
 
+    char client_id[9];
+    snprintf(client_id, 8, "%X", CHIP_ID);
+
+    mqtt_client.connect(client_id);
+
+    Serial.println("Connected to MQTT broker.");
     Serial.println("Setup complete!\n");
 }
 
