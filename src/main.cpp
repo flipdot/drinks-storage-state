@@ -37,8 +37,7 @@ long send_value(long value) {
 
     // Send MQTT message
     Serial.printf("\nPublishing to MQTT broker: %s...", json_string.c_str());
-    mqtt_client.publish(
-            "drinks_storage/scale_measurements", json_string.c_str());
+    mqtt_client.publish(MQTT_TOPIC, json_string.c_str());
     Serial.printf(" success.\n");
 }
 
