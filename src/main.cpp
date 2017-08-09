@@ -41,6 +41,23 @@ long send_value(long value) {
     Serial.printf(" success.\n");
 }
 
+int wifi_connect() {
+    Serial.println("Connecting to WiFi.");
+    WiFi.begin(SSID, PASSWORD);
+
+    int fails = 0;
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+        fails++;
+        if (fails > 60) {
+            Serial.println("\nConnection timed out.\n");
+            return 0;
+        }
+    }
+    return 1;
+}
+
 void setup() {
     delay(1000);
 
@@ -55,12 +72,8 @@ void setup() {
     scale = new HX711(DATA_PIN, CLOCK_PIN);
 
     // Initialize WiFi connection
-    Serial.println("Connecting to WiFi.");
-    WiFi.begin(SSID, PASSWORD);
-
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
+    while (!wifi_connect()) {
+        continue;
     }
 
     Serial.printf("Connected to: %s with IP address %s\n",
