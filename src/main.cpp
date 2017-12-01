@@ -14,12 +14,15 @@
 using namespace std;
 
 const uint32_t CHIP_ID = ESP.getChipId();
+const uint8_t FAIL_LIMIT_MQTT = 20;
 
 WiFiClient wifi_client;
 PubSubClient mqtt_client(MQTT_HOST, 1883, wifi_client);
 
 HX711* scale;
 vector<long> last_measurements;
+uint8_t fails_mqtt = 0;
+uint32_t packets_sent = 0;
 
 long compute_median(vector<long> values) {
     nth_element(values.begin(), values.begin() + (M_SAMPLES / 2), values.end());
@@ -32,26 +35,34 @@ long send_value(long value) {
     JsonObject& root = json_buffer.createObject();
     root["esp_id"] = CHIP_ID;
     root["scale_value"] = value;
+    root["packets_sent"] = String(packets_sent);
+    packets_sent++;
     String json_string;
     root.printTo(json_string);
 
     // Send MQTT message
-    Serial.printf("\nPublishing to MQTT broker: %s...", json_string.c_str());
-    mqtt_client.publish(MQTT_TOPIC, json_string.c_str());
-    Serial.printf(" success.\n");
+    Serial.printf("\nPublishing to MQTT broker (%s): %s... ", MQTT_HOST, json_string.c_str());
+    if (mqtt_client.publish(MQTT_TOPIC, json_string.c_str())) {
+        Serial.printf("success.");
+    } else {
+        Serial.printf("FAILED!");
+        fails_mqtt++;
+    }
 }
 
 int wifi_connect() {
-    Serial.println("Connecting to WiFi.");
+    Serial.print("Connecting to WiFi.");
     WiFi.begin(SSID, PASSWORD);
 
-    int fails = 0;
+    int fails_wifi = 0;
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
         Serial.print(".");
-        fails++;
-        if (fails > 60) {
-            Serial.println("\nConnection timed out.\n");
+        fails_wifi++;
+        if (fails_wifi > 60) {
+            Serial.println("\nConnection timed out.");
+            Serial.println("Restarting...\n");
+            ESP.restart();
             return 0;
         }
     }
@@ -76,14 +87,17 @@ void setup() {
         continue;
     }
 
-    Serial.printf("Connected to: %s with IP address %s\n",
+    Serial.printf("\nConnected to: %s with IP address %s\n",
             SSID,
             WiFi.localIP().toString().c_str());
 
     char client_id[9];
     snprintf(client_id, 8, "%X", CHIP_ID);
 
-    mqtt_client.connect(client_id);
+    if (!mqtt_client.connect(client_id)) {
+        Serial.println("Problems connecting to MQTT broker. Restarting...\n");
+        ESP.restart();
+    }
 
     Serial.println("Connected to MQTT broker.");
     Serial.println("Setup complete!\n");
@@ -99,5 +113,9 @@ void loop() {
         // Send value
         send_value(measurement_median);
         last_measurements.clear();
+        if (fails_mqtt > FAIL_LIMIT_MQTT) {
+            Serial.println("\nProblems with broker. Restarting...\n");
+            ESP.restart();
+        }
     }
 }
