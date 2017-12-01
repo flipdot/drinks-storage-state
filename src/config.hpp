@@ -11,4 +11,4 @@ constexpr const char* MQTT_TOPIC = "sensors/cellar/drinks_scale_measurements_raw
 // Network settings
 constexpr const char* SSID = "kassel.freifunk.net";
 constexpr const char* PASSWORD = "";
-constexpr const char* MQTT_HOST = "power-pi.fd";
+constexpr const char* MQTT_HOST = "mqtt.fd";
