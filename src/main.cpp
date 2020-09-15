@@ -51,6 +51,8 @@ long send_value(long value) {
 }
 
 int wifi_connect() {
+    WiFi.softAPdisconnect(true);
+    Serial.println("Disabled SoftAP mode.");
     Serial.print("Connecting to WiFi.");
     WiFi.begin(SSID, PASSWORD);
 
